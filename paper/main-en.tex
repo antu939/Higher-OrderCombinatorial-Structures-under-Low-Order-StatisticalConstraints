@@ -1,0 +1,1501 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[margin=26mm,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{newtxtext,newtxmath}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{algorithm,algpseudocode}
+\usepackage{float,placeins}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\hypersetup{
+  colorlinks=false,pdfborder={0 0 0},
+  pdftitle={Higher-Order Combinatorial Structures under Low-Order Statistical Constraints:
+            Transformations, Directed Constructions, and Realizability},
+  pdfsubject={Combinatorics, discrete optimization, combinatorial design},
+  pdfkeywords={higher-order structure, 2-switch, zero-sum trade, integer feasibility,
+               residual compensation, reachability}
+}
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{0pt}
+\linespread{1.06}
+\setlength{\emergencystretch}{2em}
+\allowdisplaybreaks[1]
+\numberwithin{equation}{section}
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{lemma}[proposition]{Lemma}
+\newtheorem{corollary}[proposition]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[proposition]{Definition}
+\floatname{algorithm}{Algorithm}
+\numberwithin{algorithm}{section}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Higher-Order Combinatorial Structures under Low-Order Constraints}
+\fancyhead[R]{\small Sections 1--6}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.35pt}
+\title{\bfseries Higher-Order Combinatorial Structures under\\[0.15em]
+Low-Order Statistical Constraints\\[0.7em]
+\large Transformations, Directed Constructions, and Realizability}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+\vspace{-3.4em}
+
+\section{Introduction}\label{sec:intro}
+
+Consider two combinatorial systems on six elements:
+\begin{equation}
+\begin{aligned}
+X_A&=\bigl\{\{1,2,3\},\{1,4,5\},\{2,4,6\},\{3,5,6\}\bigr\},\\
+X_B&=\bigl\{\{1,2,4\},\{1,3,5\},\{2,3,6\},\{4,5,6\}\bigr\}.
+\end{aligned}
+\label{eq:intro-example}
+\end{equation}
+Each system consists of four $3$-element blocks, and each element occurs exactly twice;
+in the two systems every element pair also co-occurs the same number of times.
+The triples themselves, however, are different.
+For instance, $\{1,2,3\}$ occurs once in $X_A$ and does not occur in $X_B$,
+whereas $\{1,2,4\}$ exhibits the opposite behavior.
+
+\begin{table}[htbp]
+\centering
+\caption{Motivating example: identical low-order statistics, different third-order structure}
+\label{tab:intro-example}
+\begin{tabular}{cccc}
+\toprule
+Record & $X_A$ & $X_B$ & Block size\\
+\midrule
+1 & $\{1,2,3\}$ & $\{1,2,4\}$ & 3\\
+2 & $\{1,4,5\}$ & $\{1,3,5\}$ & 3\\
+3 & $\{2,4,6\}$ & $\{2,3,6\}$ & 3\\
+4 & $\{3,5,6\}$ & $\{4,5,6\}$ & 3\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This simple construction reveals a fact worth investigating:
+\emph{once the element frequencies and the pairwise co-occurrence frequencies are fixed,
+the higher-order combinatorial structure may still retain freedom of choice.}
+Studying this freedom requires answering three progressive questions at once:
+how to change the higher-order structure while the low-order statistics remain unchanged;
+how to realize a prescribed higher-order structure deliberately;
+and which targets are realizable under finite resource constraints and reachable
+through a given set of local operations.
+
+The question arises wherever finite sets are used to express multivariate joint events.
+An incidence matrix describes the membership relation between elements and blocks,
+while first-order marginals and second-order co-occurrences provide a compact,
+computable statistical summary.
+If a combinatorial system is reconstructed from pairwise relations alone,
+the structural information contributed by three or more elements acting jointly
+remains undetermined.
+Low-order statistical fitting therefore addresses \emph{how to match known statistics},
+whereas higher-order structure construction further addresses
+\emph{how to arrange the combinations that those statistics allow}.
+
+We take a multiset of blocks as the basic object and use quota-preserving local switches
+to connect statistical fitting with structural control.
+A feasible initialization followed by residual-guided iteration first produces a reference
+system with a definite fitting quality;
+composite switches that preserve the low-order counts then expose higher-order variability.
+The switches are subsequently used for the directed induction of prescribed structures,
+and a layer-by-layer construction is completed by freezing genuine blocks and subtracting
+their contribution from the remaining statistical targets.
+Finally, association graphs, integer feasibility models, and state transition relations
+determine the boundary of what can be constructed.
+
+The main contributions of this paper are grouped into three interconnected aspects:
+\begin{enumerate}[leftmargin=2.2em,itemsep=0.25em]
+\item \textbf{Constructive characterization of higher-order variability.}
+We give a zero-sum compensating operation composed of two switches, prove that it preserves
+element frequencies, block sizes, and all second-order counts, and establish a quantitative
+measure of higher-order frequency differences.
+\item \textbf{Constrained construction of prescribed higher-order structures.}
+We introduce directed induction, complete-record freezing, and residual compensation,
+prove a strict equivalence between the residual count loss and the loss of the complete
+system, and thereby keep layer-by-layer structural control aligned with one single global
+statistical objective.
+\item \textbf{Layered decision procedure for realizability and reachability.}
+Association support graphs generate structural candidates, an integer model tests
+realizability under finite resources, and a state graph of operations describes which
+structures can be reached from a given initial system.
+\end{enumerate}
+
+The remainder of the paper follows the same logic.
+Section~\ref{sec:model} gives the unified mathematical model and the three tasks;
+Section~\ref{sec:baseline} gives feasible initialization and residual-guided baseline generation;
+Section~\ref{sec:variability} studies higher-order structural transformations within
+low-order statistical equivalence classes;
+Section~\ref{sec:directed} develops directed construction and residual compensation;
+Section~\ref{sec:boundary} studies finite realizability and operational reachability.
+
+\section{Mathematical Model and Problem Definition}\label{sec:model}
+
+This section fixes the combinatorial system, the ideal and empirical low-order statistics,
+the hard constraints, and the three research tasks.
+All subsequent methods are developed within this model.
+
+\subsection{Combinatorial systems and their incidence representation}\label{subsec:model-incidence}
+
+Let $V=\{1,\ldots,n\}$ be the ground set of elements, and let
+\begin{equation}
+\mathcal B=(B_1,\ldots,B_M),\qquad \varnothing\neq B_o\subseteq V
+\label{eq:blocks}
+\end{equation}
+be a system comprising $M$ blocks.
+Every block consists of distinct elements; the same element set may occur as several
+distinct records, so $\mathcal B$ is understood as a multiset.
+Let $k_o=|B_o|$ be the size of block $o$ and let
+$M_k=\#\{o:k_o=k\}$ be the number of blocks of size $k$, with
+\begin{equation}
+N=\sum_{o=1}^M k_o=\sum_{k=1}^n kM_k
+\label{eq:total-incidences}
+\end{equation}
+denoting the total number of element occurrences.
+
+Represent the system by a binary incidence matrix $X\in\{0,1\}^{M\times n}$ with
+$X_{oi}=\mathbf 1\{i\in B_o\}$.
+The number of occurrences of element $i$ is
+\begin{equation}
+c_i(X)=\sum_{o=1}^M X_{oi},\qquad
+\sum_i X_{oi}=k_o,\qquad \sum_i c_i(X)=N.
+\label{eq:incidence-counts}
+\end{equation}
+Throughout the paper we fix the record size sequence $\boldsymbol k=(k_1,\ldots,k_M)$
+and the element quotas $\boldsymbol c=(c_1,\ldots,c_n)$;
+when no confusion can arise we write $c_i(X)=c_i$.
+
+For $i\neq j$, define the pairwise joint containment count
+$t_{ij}(X)=\sum_oX_{oi}X_{oj}$, and record the number of singleton blocks by
+$s_i(X)=\#\{o:B_o=\{i\}\}$.
+For any nonempty subset $S\subseteq V$, define
+\begin{equation}
+t_S(X)=\sum_{o=1}^M\mathbf 1\{S\subseteq B_o\},\qquad
+\mathsf H_h(X)=\bigl(t_S(X)\bigr)_{S\in\binom{V}{h}},\quad h\geq3.
+\label{eq:high-order}
+\end{equation}
+Accordingly, $\mathcal S_h(X)=\{S\in\binom Vh:t_S(X)>0\}$ is the set of realized
+$h$-th order structures.
+The quantity $t_S$ counts the complete records that \emph{contain} $S$ and therefore
+applies naturally to blocks with more than $h$ elements.
+We write $m_X(B)=\#\{o:B_o=B\}$ for the multiplicity of the complete type $B$.
+
+Counting block by block yields the uniform higher-order total identity
+\begin{equation}
+T_h:=\sum_{S\in\binom Vh}t_S(X)=\sum_kM_k\binom kh,
+\qquad \binom kh=0\ (k<h).
+\label{eq:high-order-total}
+\end{equation}
+With the size distribution fixed, $T_h$ is constant.
+When $T_h>0$, we use
+\begin{equation}
+d_h(X,Y)=\frac{\|\mathsf H_h(X)-\mathsf H_h(Y)\|_1}{2T_h}
+\label{eq:high-order-distance}
+\end{equation}
+to measure the difference in $h$-th order frequencies between two systems;
+its values lie in $[0,1]$.
+
+\subsection{Ideal statistics, empirical statistics, and count targets}\label{subsec:model-statistics}
+
+Let $\pi_B$ be an ideal probability distribution over nonempty blocks $B$, with
+$\sum_B\pi_B=1$.
+Write \mbox{$a_i=\Pr(i\in B)>0$},
+$a_{ij}=\Pr(\{i,j\}\subseteq B)$, and
+$\mu=\mathbb E_\pi |B|=\sum_i a_i$.
+The ideal first-order marginals and second-order conditional association parameters
+are defined as
+\begin{equation}
+p_i=\frac{a_i}{\mu},\qquad
+q_{ij}=
+\begin{cases}
+a_{ij}/a_i,&i\ne j,\\
+\pi_{\{i\}}/a_i,&i=j.
+\end{cases}
+\label{eq:ideal-statistics}
+\end{equation}
+Thus $P=(p_i)$ gives the ideal proportion of all element occurrences,
+the off-diagonal entries of $Q=(q_{ij})$ give conditional co-occurrence probabilities,
+and the diagonal entries give the conditional probability of \emph{forming a block on its own}.
+This diagonal convention incorporates singleton records into the same counting model.
+The population statistics satisfy
+\begin{equation}
+\sum_i p_i=1,\qquad p_iq_{ij}=p_jq_{ji}\quad(i\ne j).
+\label{eq:ideal-balance}
+\end{equation}
+
+In a finite system the corresponding empirical quantities are
+\begin{equation}
+\widehat p_i(X)=\frac{c_i(X)}{N},\qquad
+\widehat q_{ij}(X)=
+\begin{cases}
+t_{ij}(X)/c_i(X),&i\ne j,\\
+s_i(X)/c_i(X),&i=j,
+\end{cases}\quad(c_i(X)>0).
+\label{eq:empirical-statistics}
+\end{equation}
+Hence $P,Q$ describe a given ideal law, whereas
+$\widehat P(X),\widehat Q(X)$ are produced by a concrete finite system.
+In particular,
+$c_i(X)\widehat q_{ij}(X)=c_j(X)\widehat q_{ji}(X)=t_{ij}(X)$.
+
+After fixing the total number of occurrences $N$, we transcribe the ideal statistics
+into symmetric target counts
+\begin{equation}
+\tau_{ij}=Np_iq_{ij}=Np_jq_{ji}\quad(i<j),\qquad
+\sigma_i=Np_iq_{ii}.
+\label{eq:count-targets}
+\end{equation}
+Given nonnegative weights $w_{ij},v_i,\lambda$, define the count-based fitting loss
+\begin{equation}
+E(X)=\sum_{i<j}w_{ij}\bigl(t_{ij}(X)-\tau_{ij}\bigr)^2+
+\lambda\sum_i v_i\bigl(s_i(X)-\sigma_i\bigr)^2.
+\label{eq:global-loss}
+\end{equation}
+This objective always acts on the raw counts of the complete system and serves as the
+uniform evaluation criterion for the subsequent search and for validation.
+
+\subsection{Hard constraints, reference systems, and equivalence classes}\label{subsec:model-feasible}
+
+Let $\mathcal Z\subseteq\binom V2$ be a set of structurally forbidden element pairs.
+The feasible region satisfying the quotas, the per-record sizes, and the forbidden-pair
+relations is defined as
+\begin{equation}
+\begin{aligned}
+\Omega:=\Omega(\boldsymbol c,\boldsymbol k;\mathcal Z)
+=\bigl\{X\in\{0,1\}^{M\times n}:&
+\ \sum_iX_{oi}=k_o\ \ \forall o,\\
+&\ \sum_oX_{oi}=c_i\ \ \forall i,\\
+&\ X_{oi}+X_{oj}\le 1\
+\ \ \forall o,\{i,j\}\in\mathcal Z\bigr\}.
+\end{aligned}
+\label{eq:omega}
+\end{equation}
+For a given tolerance $\varepsilon\ge0$, we write
+$\Omega_\varepsilon=\{X\in\Omega:E(X)\le\varepsilon\}$.
+
+Let $X_0\in\Omega$ be a reference system.
+Taking the second-order counts \emph{actually realized} by $X_0$ as the standard,
+we define the statistical equivalence class
+\begin{equation}
+\mathcal E(X_0)=\bigl\{X\in\Omega:
+t_{ij}(X)=t_{ij}(X_0)\ \forall i<j,\
+s_i(X)=s_i(X_0)\ \forall i\bigr\}.
+\label{eq:equivalence-class}
+\end{equation}
+Inside this set, $\widehat P$, $\widehat Q$, and $E$ are all fixed,
+whereas $\mathsf H_h$ is the object we wish to change and control.
+
+For directed construction, let
+\begin{equation}
+\mathcal G=\{(U_\nu,m_\nu,\bowtie_\nu)\}_{\nu=1}^{J},
+\qquad |U_\nu|\ge3,\quad m_\nu\in\mathbb Z_{\ge0},\quad
+\bowtie_\nu\in\{\ge,=\},
+\label{eq:directed-goals}
+\end{equation}
+denote a target set requiring $t_{U_\nu}(X)\bowtie_\nu m_\nu$.
+Let $F$ denote the complete block records already frozen and $R$ the records that remain
+mutable, and write $X=F\sqcup R$.
+The multiset union $\sqcup$ is taken over concrete record indices.
+Set $\Omega(F)=\{X\in\Omega:X\text{ preserves all records of }F\}$.
+
+For any group of records $Y$, let $c_i(Y)$, $M_k(Y)$, $t_{ij}(Y)$, and $s_i(Y)$ be the
+corresponding counts, and define the additive statistic vector
+\begin{equation}
+\Phi(Y)=\bigl((c_i(Y))_i,(M_k(Y))_k,
+(t_{ij}(Y))_{i<j},(s_i(Y))_i\bigr).
+\label{eq:phi-definition}
+\end{equation}
+This notation uniformly represents the element quotas, the record capacities, and the
+low-order counts consumed by the frozen records.
+
+To study association support, define
+\begin{equation}
+L_Q=\bigl\{\{i,j\}:i<j,\ q_{ij}>0\bigr\},\qquad
+G_Q=(V,L_Q),\qquad
+G_{\rm allow}=\left(V,\binom V2\setminus\mathcal Z\right).
+\label{eq:support-graphs}
+\end{equation}
+The positive-association coverage feasible region is
+\begin{equation}
+\Omega^+(L_Q)=\{X\in\Omega:t_{ij}(X)\ge1,\ \forall\{i,j\}\in L_Q\}.
+\label{eq:positive-support-domain}
+\end{equation}
+Positive-association coverage requires every specified positive association to be realized
+at least once; when the task requires the support graph to be preserved exactly, one
+additionally imposes $t_{ij}(X)=0$ for $\{i,j\}\notin L_Q$.
+For any graph $G$, let
+$\mathcal K_h(G)=\{S\in\binom Vh:\binom S2\subseteq E(G)\}$ denote all $h$-th order
+clique candidates.
+
+\subsection{Local switches}\label{subsec:model-switch}
+
+The basic operation exchanges $a$ and $b$ between two distinct records
+$A=A_0\cup\{a\}$ and $B=B_0\cup\{b\}$, where $a\in A\setminus B$ and $b\in B\setminus A$:
+\begin{equation}
+(A,B)\ \xrightarrow{\;2\text{-switch}\;}\
+(A_0\cup\{b\},\,B_0\cup\{a\}).
+\label{eq:2switch}
+\end{equation}
+This operation preserves the size of every record and all element quotas.
+Checking the forbidden-pair condition on the two modified records yields a legal $2$-switch.
+Records from different size strata are allowed to participate in the same switch;
+their local count changes, residual-guided search, and feasible initialization are all
+given uniformly in Section~\ref{sec:baseline}.
+
+\subsection{Three progressive research questions}\label{subsec:model-questions}
+
+\noindent\textbf{Problem 1: structural variability.}
+Given $X_0\in\Omega$, construct $Y\in\mathcal E(X_0)$ such that
+$\mathsf H_h(Y)\neq\mathsf H_h(X_0)$ for some $h\ge3$, and quantify the structural
+difference by $d_h$.
+
+\smallskip
+\noindent\textbf{Problem 2: construction of a prescribed structure.}
+Given $\mathcal G$ and a tolerance $\varepsilon$, find a system in $\Omega_\varepsilon$
+that satisfies all targets.
+In exact-preservation mode, the system is further required to belong to $\mathcal E(X_0)$.
+The algorithm records realized targets and remaining resources in the form $F\sqcup R$.
+
+\smallskip
+\noindent\textbf{Problem 3: boundary decision.}
+Given association support requirements $L_Q$, finite resources, and an allowed operation
+set $\mathcal A$, determine which $h$-th order structures are realizable in
+$\Omega^+(L_Q)$, and compare these structures with those reachable from $X_0$ through
+$\mathcal A$.
+
+\section{Feasible Generation under Low-Order Statistical Constraints}\label{sec:baseline}
+
+Before studying higher-order structures we first need a reference system $X_0$ with a
+definite low-order statistical quality.
+This section constructs it: integer quotas are set from the ideal marginals, an initial
+configuration satisfying the block capacities and the forbidden-pair conditions is found,
+and legal $2$-switches are then iterated under the guidance of second-order count residuals.
+The search preserves the hard constraints as invariants throughout and measures fitting
+quality by the global count loss of \eqref{eq:global-loss}.
+
+\subsection{Integer resource allocation}\label{subsec:baseline-budget}
+
+Given the number of blocks $M$ and their size distribution $(M_k)$, expand the strata into
+a sequence $\boldsymbol k=(k_1,\ldots,k_M)$; the total number of element occurrences is
+$N=\sum_k kM_k$.
+For ideal marginals $P=(p_i)$, the corresponding real-valued occurrence counts are $Np_i$.
+In choosing integer quotas $\boldsymbol c$, one may solve
+\begin{equation}
+\begin{aligned}
+\min_{\boldsymbol c\in\mathbb Z_{\ge0}^{n}}\quad&
+\sum_{i=1}^{n}|c_i-Np_i|,\\
+\mathrm{s.t.}\quad&
+\sum_{i=1}^n c_i=N,\qquad 0\le c_i\le M\quad(i\in V).
+\end{aligned}
+\label{eq:baseline-margins}
+\end{equation}
+When the capacities allow, one may also round by the largest remainder method.
+For elements whose empirical conditional association rows are to be fully estimated,
+choose $c_i>0$.
+Once the quotas are fixed, the first-order statistics of every legal system are fixed at
+\begin{equation}
+\widehat p_i(X)=\frac{c_i}{N},\qquad
+\left|\widehat p_i(X)-p_i\right|
+=\frac{|c_i-Np_i|}{N}.
+\label{eq:baseline-margin-error}
+\end{equation}
+Integer rounding of the quotas therefore controls the first-order error, and the subsequent
+iterations concentrate on adjusting second-order associations.
+
+Integer quotas and record capacities must first satisfy
+$\sum_i c_i=\sum_o k_o$, $c_i\le M$, and $k_o\le n$.
+More precise feasibility is determined together with the incidence-matrix initialization
+of the next step.
+
+\subsection{Feasible initialization: maximum flow and integer programming}\label{subsec:baseline-init}
+
+The initialization solves the following incidence-matrix problem:
+\begin{equation}
+\begin{aligned}
+X^{(0)}\in\{0,1\}^{M\times n},\qquad&
+\sum_iX^{(0)}_{oi}=k_o\quad(o=1,\ldots,M),\\
+&\sum_oX^{(0)}_{oi}=c_i\quad(i\in V),\\
+&X^{(0)}_{oi}+X^{(0)}_{oj}\le1
+\quad(o=1,\ldots,M,\ \{i,j\}\in\mathcal Z).
+\end{aligned}
+\label{eq:baseline-initial-constraints}
+\end{equation}
+Initialization first establishes a strictly legal configuration;
+second-order statistics are optimized afterwards by switch iteration.
+
+When $\mathcal Z=\varnothing$, build a four-layer flow network:
+source $s$, record nodes $o$, element nodes $i$, and sink $t$.
+The capacities of the three classes of directed edges are
+\begin{equation}
+s\to o:\ k_o,\qquad o\to i:\ 1,\qquad i\to t:\ c_i.
+\label{eq:baseline-network}
+\end{equation}
+An integral maximum flow of value $N$ saturates the capacity of every record node and
+realizes the prescribed number of occurrences of each element.
+Taking $X^{(0)}_{oi}$ as the flow on edge $o\to i$ yields the binary matrix of
+\eqref{eq:baseline-initial-constraints}.
+
+When $\mathcal Z\ne\varnothing$, add the per-record linear constraint associated with each
+forbidden edge to the row-sum and column-sum equations, which directly yields a binary
+integer program.
+For instances with forbidden pairs one may also add predetermined record-type restrictions
+to the feasibility solver and let the solver return a complete system satisfying the hard
+constraints.
+
+After $X^{(0)}$ is built, a single pass over all records and their internal element pairs
+yields the initial $t_{ij}(X^{(0)})$ and $s_i(X^{(0)})$.
+The cost of direct counting is
+\begin{equation}
+O\!\left(\sum_{o=1}^M k_o^2\right).
+\label{eq:baseline-count-cost}
+\end{equation}
+The target counts $\tau_{ij},\sigma_i$ follow from \eqref{eq:count-targets}, and the initial
+error $E(X^{(0)})$ follows from \eqref{eq:global-loss}.
+The generation problem is thereby reduced to finding a system of lower error inside the
+fixed feasible region $\Omega$.
+
+\subsection{Cross-stratum switches and the search space}\label{subsec:baseline-switch}
+
+Using the $2$-switch defined in Section~\ref{subsec:model-switch}, exchange $a$ and $b$
+between two records $A=A_0\cup\{a\}$ and $B=B_0\cup\{b\}$.
+The legality check involves only the newly inserted elements:
+\begin{equation}
+\{b,z\}\notin\mathcal Z\quad(\forall z\in A_0),\qquad
+\{a,z\}\notin\mathcal Z\quad(\forall z\in B_0).
+\label{eq:baseline-swap-legal}
+\end{equation}
+Every legal switch preserves the size of each record and all element quotas, so the search
+state always lies in $\Omega$.
+
+To enlarge the set of adjustable statistical dimensions, the two records are allowed to
+come from different size strata.
+For example,
+\begin{equation}
+\{\mathbf1\},\ \{\mathbf2,3\}
+\ \longrightarrow\
+\{\mathbf3\},\ \{\mathbf2,1\}.
+\label{eq:baseline-cross-stratum}
+\end{equation}
+Both record sizes and the quotas of all three elements remain unchanged, while the element
+pair $\{2,3\}$ is replaced by $\{1,2\}$, and the element occurring in the singleton record
+changes from $1$ to $3$.
+
+Cross-stratum switches have a definite statistical effect.
+Define the number of occurrences of element $i$ in blocks of size $k$ as
+\begin{equation}
+d_{ik}(X)=\#\{o:|B_o|=k,\ i\in B_o\}.
+\label{eq:baseline-layer-count}
+\end{equation}
+If switches are always confined to records of equal size, all $d_{ik}$ are invariants,
+which simultaneously fixes
+\begin{equation}
+\widehat q_{ii}(X)=\frac{d_{i1}(X)}{c_i},\qquad
+\sum_{j\ne i}\widehat q_{ij}(X)
+=\frac{\sum_k(k-1)d_{ik}(X)}{c_i}.
+\label{eq:baseline-layer-invariant}
+\end{equation}
+Cross-stratum switches, by contrast, allow the $d_{ik}$ to be redistributed among strata and
+thus take part in the joint fitting of diagonal and off-diagonal terms.
+
+\subsection{Second-order residuals and the exact gain of a single switch}\label{subsec:baseline-local-delta}
+
+Let the current second-order count residuals be
+\begin{equation}
+r_{ij}(X)=t_{ij}(X)-\tau_{ij}\quad(i<j),\qquad
+u_i(X)=s_i(X)-\sigma_i.
+\label{eq:baseline-residuals}
+\end{equation}
+For a switch $X\to X'$, write
+$\Delta t_{ij}=t_{ij}(X')-t_{ij}(X)$ and
+$\Delta s_i=s_i(X')-s_i(X)$.
+Counting record by record shows that, for $z\notin\{a,b\}$,
+\begin{equation}
+\begin{aligned}
+\Delta t_{az}
+&=\mathbf1\{z\in B_0\}-\mathbf1\{z\in A_0\},\\
+\Delta t_{bz}
+&=-\Delta t_{az},\qquad \Delta t_{ab}=0,\\
+\Delta s_a
+&=\mathbf1\{|B|=1\}-\mathbf1\{|A|=1\},
+\qquad \Delta s_b=-\Delta s_a .
+\end{aligned}
+\label{eq:switch-local-change}
+\end{equation}
+All other element-pair and singleton counts remain unchanged.
+Hence the second-order change of a single switch is confined to the count terms involving
+$a,b$ and $A_0\triangle B_0$.
+
+Using the difference identity for squared residuals, we obtain the \emph{exact} loss change
+of a single switch
+\begin{equation}
+\boxed{
+\begin{aligned}
+\Delta E
+={}&\sum_{z\in A_0\triangle B_0}
+\sum_{x\in\{a,b\}}
+w_{xz}\bigl(2r_{xz}\Delta t_{xz}+(\Delta t_{xz})^2\bigr)\\
+&+\lambda\sum_{x\in\{a,b\}}
+v_x\bigl(2u_x\Delta s_x+(\Delta s_x)^2\bigr).
+\end{aligned}
+}
+\label{eq:switch-loss-delta}
+\end{equation}
+Here $w_{xz},r_{xz}$ are read symmetrically for unordered element pairs.
+As long as the current residuals are directly accessible, the cost of evaluating a candidate
+grows with $|A_0\triangle B_0|$ and does not require recomputing the full second-order count
+matrix.
+
+\paragraph{Computational example with two records.}
+Continuing \eqref{eq:baseline-cross-stratum}, take targets $\tau_{12}=1$ and
+$\tau_{13}=\tau_{23}=0$,
+$\sigma_1=\sigma_2=0$ and $\sigma_3=1$,
+set all weights to $1$, and let $\lambda=1$.
+Before the switch the nonzero counts are $t_{23}=1$ and $s_1=1$;
+after the switch they are $t_{12}=1$ and $s_3=1$.
+Hence
+\begin{equation}
+E(X)=4,\qquad E(X')=0,\qquad\Delta E=-4.
+\label{eq:baseline-swap-example}
+\end{equation}
+A single switch simultaneously corrects two element-pair counts and two singleton counts,
+and \eqref{eq:switch-loss-delta} incorporates all these gains into the selection criterion.
+
+\subsection{Residual-guided candidate generation and acceptance rules}\label{subsec:baseline-proposal}
+
+Residuals not only evaluate the current system but also guide the next search step.
+When $r_{ij}>0$ the pair $\{i,j\}$ co-occurs too often, and candidate generation
+preferentially tries to separate the two elements;
+when $r_{ij}<0$ it preferentially tries to make them co-occur.
+A single switch usually affects several counts, so every candidate is re-evaluated by
+\eqref{eq:switch-loss-delta} for its total gain.
+
+Concretely, we use a mixed proposal.
+With probability $\rho\in[0,1]$, select an element pair whose current error is prominent
+according to $\lvert r_{ij}\rvert$ or a weighted version thereof, and look for a legal
+switch among the records that contain this pair or are able to introduce it;
+with probability $1-\rho$, sample two records and $a\in A\setminus B$,
+$b\in B\setminus A$ at random.
+Both proposal types share the same legality test and the same $\Delta E$ evaluation.
+
+With pure discrete descent, only candidates with $\Delta E\le0$ are accepted.
+To enlarge the search range, one may use a temperature $T_\ell>0$ that decreases with the
+iteration and accept a legal switch with probability
+\begin{equation}
+\Pr(\mathrm{accept}\mid X,X')=
+\begin{cases}
+1,&\Delta E\le0,\\
+\exp(-\Delta E/T_\ell),&\Delta E>0
+\end{cases}
+\label{eq:baseline-annealing}
+\end{equation}
+The algorithm also keeps the system $X_{\mathrm{best}}$ with the lowest error over the whole
+search rather than directly returning the last search state.
+
+\subsection{Error bounds and output validation}\label{subsec:baseline-properties}
+
+Integer counting yields a direct second-order fitting baseline.
+Let
+\begin{equation}
+I_{ij}=
+\bigl[\max\{0,c_i+c_j-M\},\,\min\{c_i,c_j\}\bigr]\cap\mathbb Z.
+\label{eq:baseline-pair-range}
+\end{equation}
+
+\begin{proposition}[Lower bound on the second-order loss under finite resources]
+\label{prop:baseline-lower-bound}
+For any $X\in\Omega$,
+\begin{equation}
+\begin{aligned}
+E(X)\ge {}&
+\sum_{i<j}w_{ij}\operatorname{dist}(\tau_{ij},I_{ij})^2\\
+&+\lambda\sum_i v_i
+\operatorname{dist}\bigl(\sigma_i,
+\{0,\ldots,\min(c_i,M_1)\}\bigr)^2,
+\end{aligned}
+\label{eq:baseline-lower-bound}
+\end{equation}
+where $\operatorname{dist}(x,S)=\min_{y\in S}|x-y|$.
+\end{proposition}
+\begin{proof}
+The number of joint occurrences of any two elements satisfies
+$\max\{0,c_i+c_j-M\}\le t_{ij}(X)\le\min\{c_i,c_j\}$;
+the number of singleton records satisfies
+$0\le s_i(X)\le\min(c_i,M_1)$.
+For each nonnegative weighted square, take the minimum over the realizable integer interval
+and sum the results.
+\end{proof}
+
+\subsection{The complete generation algorithm and its interface to later sections}\label{subsec:baseline-algorithm}
+
+The steps above are combined in Algorithm~\ref{alg:baseline}.
+Integer quotas and feasible initialization establish a legal starting point;
+residual guidance and random proposals supply the exploration directions;
+the local increment formula provides exact evaluation;
+the annealing rule decides the move from the current state, and the best-state record
+determines the final output.
+
+\begin{algorithm}[H]
+\small
+\caption{Feasible initialization and residual-guided second-order statistical fitting}
+\label{alg:baseline}
+\begin{algorithmic}[1]
+\Require Ideal statistics $P,Q$; size sequence $\boldsymbol k$;
+forbidden set $\mathcal Z$; weights; proposal ratio $\rho$;
+temperature sequence $(T_\ell)$; iteration budget $L$; target threshold $\varepsilon$
+\Ensure Best-seen reference system $X_0$ and its statistical error
+\State $N\gets\sum_o k_o$
+\State $\boldsymbol c\gets\Call{RoundMargins}{NP,\boldsymbol k}$
+\State $X\gets\Call{FeasibleInit}{\boldsymbol c,\boldsymbol k,\mathcal Z}$
+\State Compute target counts $\tau,\sigma$ and current counts $t,s$
+\State $E\gets E(X)$; $X_{\mathrm{best}}\gets X$;
+       $E_{\mathrm{best}}\gets E$
+\For{$\ell=1,\ldots,L$}
+  \State With probability $\rho$ choose a residual-guided proposal; otherwise use a random proposal
+  \State Propose $(A,B,a,b)\gets\Call{ProposeSwap}{X,r,\rho}$
+  \If{no candidate exists or the forbidden-pair check fails}
+    \State \textbf{continue}
+  \EndIf
+  \State Compute $\Delta t,\Delta s$ from \eqref{eq:switch-local-change}
+  \State Compute $\Delta E$ from \eqref{eq:switch-loss-delta}
+  \If{$\Delta E\le0$ \textbf{or} $U<\exp(-\Delta E/T_\ell)$,
+       where $U\sim\mathrm{Uniform}(0,1)$}
+    \State Perform the switch; update $t,s,r,u,E$ locally
+    \If{$E<E_{\mathrm{best}}$}
+      \State $X_{\mathrm{best}}\gets X$;
+             $E_{\mathrm{best}}\gets E$
+    \EndIf
+  \EndIf
+  \If{$E_{\mathrm{best}}\le\varepsilon$}
+    \State \textbf{break}
+  \EndIf
+\EndFor
+\State $X_0\gets X_{\mathrm{best}}$
+\State \Return $X_0,E_{\mathrm{best}},\widehat P(X_0),\widehat Q(X_0)$
+\end{algorithmic}
+\end{algorithm}
+
+For a pure descent algorithm, the acceptance condition reduces to $\Delta E\le0$.
+When a temperature sequence is used, let each $T_\ell>0$ and decrease its value gradually
+according to the annealing schedule in use.
+In an implementation it suffices to keep updating the few counts affected by each switch and
+to maintain an inverted index from elements to records, so that residual-guided candidate
+generation remains efficient.
+
+The output $X_0$ preserves the given quotas, per-record sizes, and forbidden-pair relations;
+its second-order fitting result is characterized by $E(X_0)$, $\widehat Q(X_0)$, and the
+associated count residuals.
+This step provides a common starting point for the three subsequent problems:
+
+Section~\ref{sec:variability} fixes the low-order counts actually realized by $X_0$ and
+explores higher-order structural changes within the statistical equivalence class;
+Section~\ref{sec:directed} induces and freezes prescribed structures under the statistical
+targets of the complete system;
+Section~\ref{sec:boundary} further studies the structural boundary under finite resources and
+operation rules.
+
+\section{Higher-Order Structural Transformations under Fixed Low-Order Statistics}\label{sec:variability}
+
+This section answers the first question: how can the higher-order structure be changed while
+the complete second-order statistics remain unchanged?
+The core idea is to organize two local switches into a composite operation whose low-order
+count increments cancel.
+
+\subsection{Describing a switch by its count increment}\label{subsec:variation-signature}
+
+Let $X'$ be obtained from $X$ by one legal $2$-switch.
+Combine the pairwise co-occurrence changes and the singleton changes into the symmetric matrix
+\begin{equation}
+D_{ij}(X,X')=
+\begin{cases}
+t_{ij}(X')-t_{ij}(X),&i\neq j,\\
+s_i(X')-s_i(X),&i=j.
+\end{cases}
+\label{eq:low-order-signature}
+\end{equation}
+Since a switch preserves element quotas and per-record sizes, $D$ completely describes the
+change in the remaining low-order statistics.
+For $A_0,B_0,a,b$ in \eqref{eq:2switch}, let $\boldsymbol e_i$ be the $i$-th unit vector and
+$\boldsymbol 1_C$ the indicator vector of a set $C$, and write
+\begin{equation}
+\boldsymbol r=\boldsymbol1_{B_0}-\boldsymbol1_{A_0},\qquad
+\delta=\mathbf1\{|B|=1\}-\mathbf1\{|A|=1\}.
+\label{eq:trade-signature}
+\end{equation}
+Then \eqref{eq:switch-local-change} can be written as
+\begin{equation}
+D=(\boldsymbol e_a-\boldsymbol e_b)\boldsymbol r^\top+
+\boldsymbol r(\boldsymbol e_a-\boldsymbol e_b)^\top+
+\delta\operatorname{Diag}(\boldsymbol e_a-\boldsymbol e_b).
+\label{eq:signature-matrix}
+\end{equation}
+This expression compresses the low-order effect of a switch into $(a,b,\boldsymbol r,\delta)$.
+For the same element pair $a,b$, two switches whose background difference vectors and
+singleton changes are both opposite have low-order effects that cancel exactly.
+
+\subsection{Zero-sum compensating trades on four blocks}\label{subsec:variation-trade}
+
+On four records with pairwise distinct indices, take
+\begin{equation}
+\begin{aligned}
+A&=A_0\cup\{a\},&B&=B_0\cup\{b\},\\
+C&=C_0\cup\{a\},&D&=D_0\cup\{b\},
+\end{aligned}
+\label{eq:four-block-trade}
+\end{equation}
+where the two switches take place on $(A,B)$ and $(C,D)$ respectively.
+Let $(\boldsymbol r_1,\delta_1)$ and $(\boldsymbol r_2,\delta_2)$ denote the signatures of
+the two switches.
+
+\begin{proposition}[Low-order preservation of a zero-sum compensating trade]
+\label{prop:zero-sum-trade}
+If the four records have pairwise distinct indices, both switches are legal, and
+\begin{equation}
+\boldsymbol r_1+\boldsymbol r_2=\boldsymbol0,\qquad
+\delta_1+\delta_2=0,
+\label{eq:zero-sum-condition}
+\end{equation}
+then the system $Y$ obtained after the composite switch belongs to $\mathcal E(X)$.
+\end{proposition}
+\begin{proof}
+Each switch preserves all row sums and column sums.
+By \eqref{eq:signature-matrix} and \eqref{eq:zero-sum-condition}, the low-order change
+matrices of the two switches satisfy $D_1+D_2=0$.
+Since the four records are distinct, the two operations can be carried out independently on
+the same original system, so the composite operation preserves all $t_{ij}$ and $s_i$.
+Combining the row- and column-sum invariants with legality yields $Y\in\mathcal E(X)$.
+\end{proof}
+
+We return to the system $X_A$ of \eqref{eq:intro-example}.
+The first step exchanges $3$ and $4$ between $\{1,2,\mathbf3\}$ and $\{1,\mathbf4,5\}$,
+whose background difference vector is
+$\boldsymbol r_1=\boldsymbol e_5-\boldsymbol e_2$.
+The second step exchanges the same pair of elements between $\{\mathbf3,5,6\}$ and
+$\{2,\mathbf4,6\}$, whose background difference vector is
+$\boldsymbol r_2=\boldsymbol e_2-\boldsymbol e_5$.
+Both steps take place on $3$-element records, so $\delta_1=\delta_2=0$.
+The composite operation yields exactly $X_B$ and satisfies
+\begin{equation}
+X_B\in\mathcal E(X_A),\qquad
+\mathcal S_3(X_A)\cap\mathcal S_3(X_B)=\varnothing.
+\label{eq:example-invariant}
+\end{equation}
+Each system has four triples,
+$\|\mathsf H_3(X_A)-\mathsf H_3(X_B)\|_1=8$ and $T_3=4$, hence
+\begin{equation}
+d_3(X_A,X_B)=\frac{8}{2\times4}=1.
+\label{eq:example-distance}
+\end{equation}
+This exhibits a concrete transformation that attains the maximum normalized third-order
+difference while the complete second-order counts are conserved.
+
+\subsection{Searching for higher-order structures within an equivalence class}\label{subsec:variation-search}
+
+A zero-sum compensating trade can serve directly as a search step for exploring the
+equivalence class.
+Starting from $X_0$, the algorithm first enumerates or samples a first legal switch and
+computes its signature $(a,b,\boldsymbol r,\delta)$;
+it then looks among the unused records for a legal switch with signature
+$(a,b,-\boldsymbol r,-\delta)$.
+The outcomes of the two switches form a candidate $Y$, which is accepted when its
+higher-order frequency vector changes, and the local indices and higher-order counts are
+updated.
+
+\begin{algorithm}[H]
+\small
+\caption{Higher-order structure exploration within a second-order statistical equivalence class}
+\label{alg:variation}
+\begin{algorithmic}[1]
+\Require Legal reference system $X_0$; forbidden set $\mathcal Z$; search budget $L$
+\Ensure Construction $X$ preserving the low-order statistics of the reference system
+\State $X\gets X_0$
+\For{$\ell=1,\ldots,L$}
+  \State Select a first legal switch in $X$ and compute its signature $(a,b,\boldsymbol r,\delta)$
+  \State Search the remaining records for a legal switch with signature $(a,b,-\boldsymbol r,-\delta)$
+  \If{a compensating switch is found}
+    \State Compute the system $Y$ after the composite switch on the four records
+    \If{$\mathsf H_h(Y)\ne\mathsf H_h(X)$ for some $h\ge3$ of interest}
+      \State $X\gets Y$; update the affected records and higher-order counts
+    \EndIf
+  \EndIf
+\EndFor
+\State \Return $X$
+\end{algorithmic}
+\end{algorithm}
+
+The search can be directed toward different structural objectives.
+If higher-order diversity is of interest, one may record $\lvert\mathcal S_h(X)\rvert$ and
+retain several distinct higher-order frequency vectors;
+if one wishes to move away from the initial system, one may preferentially accept candidates
+that increase $d_h(X,X_0)$.
+In an implementation, switch signatures can be matched by hash tables or inverted indices,
+so that the compensation search concentrates on a small number of relevant records.
+
+The construction above reveals a definite structural operation: by designing the change in
+the low-order counts as a zero-sum combination, one can move along the statistical
+equivalence class to change the higher-order structure.
+The next section advances this structural transformation from \emph{exploring different
+outcomes} to \emph{realizing a prescribed outcome}.
+
+\section{Directed Construction of Prescribed Higher-Order Structures}\label{sec:directed}
+
+Section~\ref{sec:variability} exhibited higher-order variability within a low-order
+statistical equivalence class by means of zero-sum compensating trades.
+This section further considers the problem of realizing a prescribed target set $\mathcal G$.
+The basic procedure is first to \emph{induce} the target, choosing the records that actually
+carry it as a temporary anchor group, then to \emph{freeze} these records and perform
+\emph{residual compensation} on the free part, and finally to validate the complete
+candidate, \emph{committing} it officially only if validation succeeds.
+Intermediate states in a candidate construction need not satisfy the final statistical
+conditions; an already committed complete system, by contrast, always satisfies the
+corresponding conditions.
+
+\subsection{Directed induction and target anchoring}\label{subsec:directed-induction}
+
+Consider a target $U\subseteq V$ with $|U|\ge3$.
+For a switch as in \eqref{eq:2switch}, the increment in the number of occurrences of $U$ is
+\begin{equation}
+\Delta_U=
+\begin{cases}
+\mathbf1\{U\setminus\{a\}\subseteq B_0\}
+-\mathbf1\{U\setminus\{a\}\subseteq A_0\},
+&a\in U,\ b\notin U,\\
+\mathbf1\{U\setminus\{b\}\subseteq A_0\}
+-\mathbf1\{U\setminus\{b\}\subseteq B_0\},
+&b\in U,\ a\notin U,\\
+0,&\text{otherwise}.
+\end{cases}
+\label{eq:directed-gain}
+\end{equation}
+Hence, to increase the number of structures $U$ containing $a$, one may preferentially look
+for records that already contain $U\setminus\{a\}$ and move $a$ into such a record by a legal
+switch.
+Equality-type targets may also require decreasing an existing $U$, and the same increment
+formula can be used to evaluate candidates.
+
+For at-least targets, let $\eta_\nu>0$ and define the coverage score
+\begin{equation}
+S_{\mathcal G}(X)=
+\sum_{\nu:\bowtie_\nu=\ge}
+\eta_\nu\min\{m_\nu,t_{U_\nu}(X)\}.
+\label{eq:directed-score}
+\end{equation}
+In the candidate-generation phase, one may rank switches by
+\begin{equation}
+J(X,Y)=S_{\mathcal G}(Y)-S_{\mathcal G}(X)
+-\beta\bigl(E(Y)-E(X)\bigr),\qquad \beta\ge0,
+\label{eq:directed-priority}
+\end{equation}
+and for equality-type targets the search is additionally guided by the decrease of
+$|t_{U_\nu}(X)-m_\nu|$.
+The score is used only to select candidates; it does not replace the final feasibility and
+target validation.
+
+Keeping the current frozen group $F$ fixed, only the free records are modified, yielding a
+provisional candidate.
+From the complete records that actually contain the target $U$ in the candidate, choose an
+\emph{anchor group} $G$; records are distinguished by index, so that even identical element
+sets count as different records.
+By additivity of the counts,
+\begin{equation}
+t_U(F\sqcup R)=t_U(F)+t_U(R)\ge t_U(F).
+\label{eq:anchor-guarantee}
+\end{equation}
+Hence, for $t_U\ge m$, as long as $F\sqcup G$ already contains at least $m$ records
+containing $U$, this \emph{lower bound} is guaranteed permanently by never modifying these
+frozen records.
+For $t_U=m$, even if $m$ records have been frozen, the free records may still produce $U$
+again, so equality must be checked at this and at every later official commit.
+In particular, when $m=0$ no carrying record needs to be frozen for this target, and one may
+take $G=\varnothing$.
+
+We distinguish two final validation modes:
+\emph{exact-preservation mode} requires the committed complete system $X'$ to satisfy
+$X'\in\mathcal E(X_0)$;
+\emph{tolerance-controlled mode} requires $X'\in\Omega$ and $E(X')\le\varepsilon$.
+Both modes allow general legal $2$-switches on candidates that have not yet been committed,
+temporarily changing second-order counts and compensating afterwards on the free part.
+The zero-sum compensating trades of Section~\ref{sec:variability} remain directly usable as a
+candidate-generation method, but there is no requirement that every internal candidate switch
+preserve the second-order counts individually.
+
+\subsection{Frozen resources and residual compensation}\label{subsec:directed-residual}
+
+After the $r$-th successful commit, the cumulative frozen records are $F^{(r)}$, the free
+records are $R_r$, and the complete system is written
+\begin{equation}
+X_r=F^{(r)}\sqcup R_r,\qquad F^{(0)}=\varnothing.
+\label{eq:recursive-split}
+\end{equation}
+For the statistic vector of Section~\ref{sec:model},
+\begin{equation}
+\Phi(F\sqcup R)=\Phi(F)+\Phi(R).
+\label{eq:stat-add}
+\end{equation}
+We combine the raw integer resources with the ideal low-order targets into
+\begin{equation}
+b^\star=\bigl(\boldsymbol c,(M_k)_k,
+(\tau_{ij})_{i<j},(\sigma_i)_i\bigr).
+\label{eq:original-budget}
+\end{equation}
+After freezing $F^{(r)}$, the remaining resources and fitting targets of the free system are
+\begin{equation}
+\boxed{\quad b_r^\star=b^\star-\Phi(F^{(r)}).\quad}
+\label{eq:budget-subtraction}
+\end{equation}
+that is,
+\begin{equation}
+\begin{aligned}
+d_i^{(r)}&=c_i-c_i(F^{(r)}),&
+M_k^{(r)}&=M_k-M_k(F^{(r)}),\\
+\tau_{ij}^{(r)}&=\tau_{ij}-t_{ij}(F^{(r)}),&
+\sigma_i^{(r)}&=\sigma_i-s_i(F^{(r)}).
+\end{aligned}
+\label{eq:residual-targets}
+\end{equation}
+Here $d_i^{(r)},M_k^{(r)}$ are the integer resource constraints that the free system must
+satisfy, while $\tau_{ij}^{(r)},\sigma_i^{(r)}$ are the fitting references in the loss
+function, which need not be nonnegative integers.
+After adding an anchor group $G$, one only needs to update
+$b_{r+1}^\star=b_r^\star-\Phi(G)$.
+
+With the original weights, define the residual loss
+\begin{equation}
+E_r(R)=
+\sum_{i<j}w_{ij}\bigl(t_{ij}(R)-\tau_{ij}^{(r)}\bigr)^2+
+\lambda\sum_i v_i\bigl(s_i(R)-\sigma_i^{(r)}\bigr)^2.
+\label{eq:residual-loss}
+\end{equation}
+
+\begin{proposition}[Equivalence of the residual loss and the loss of the complete system]
+\label{prop:residual-equivalence}
+Fix any complete group of records $F^{(r)}$.
+For any free record system $R$,
+\begin{equation}
+\boxed{\ E(F^{(r)}\sqcup R)=E_r(R).\ }
+\label{eq:loss-equivalence}
+\end{equation}
+\end{proposition}
+\begin{proof}
+Additivity of the counts gives
+\[
+t_{ij}(F^{(r)}\sqcup R)-\tau_{ij}
+=t_{ij}(R)-\bigl(\tau_{ij}-t_{ij}(F^{(r)})\bigr)
+=t_{ij}(R)-\tau_{ij}^{(r)}.
+\]
+The singleton counts likewise satisfy
+$s_i(F^{(r)}\sqcup R)-\sigma_i=s_i(R)-\sigma_i^{(r)}$.
+Substituting the two identities into \eqref{eq:global-loss} gives the claim.
+\end{proof}
+
+This proposition shows that, as long as the frozen group is unchanged, optimizing $E_r$ on
+the free system is optimizing the loss of the same complete system.
+One may therefore reuse the legal switches, the local residual updates, and the search
+methods of Section~\ref{sec:baseline} without redefining the global evaluation criterion.
+
+For \emph{exact-preservation mode}, one must additionally distinguish the ideal targets from
+the counts actually realized by the reference system.
+After fixing $F^{(r)}$, the complete system belongs to $\mathcal E(X_0)$ if and only if its
+hard constraints hold and the free part satisfies
+\begin{equation}
+\begin{aligned}
+t_{ij}(R)&=t_{ij}(X_0)-t_{ij}(F^{(r)})&&(\forall i<j),\\
+s_i(R)&=s_i(X_0)-s_i(F^{(r)})&&(\forall i).
+\end{aligned}
+\label{eq:exact-residual-targets}
+\end{equation}
+Exact-preservation mode therefore uses \eqref{eq:exact-residual-targets} as the final count
+condition; unless the ideal counts happen to coincide with the actual counts of $X_0$,
+checking $E_r(R)$ alone is not sufficient to decide membership in $\mathcal E(X_0)$.
+
+\subsection{Recursive directed construction and correctness}\label{subsec:directed-algorithm}
+
+Let $X_0\in\Omega$ and, in tolerance-controlled mode, additionally $E(X_0)\le\varepsilon$.
+Let $\mathcal C$ denote the set of \emph{accepted target commitments}:
+every $g=(U,m,\bowtie)\in\mathcal C$ requires each subsequently committed complete system to
+continue satisfying $t_U\bowtie m$.
+Unlike the frozen records $F$, $\mathcal C$ records \emph{logical conditions} that must be
+checked continuously; a single frozen record cannot by itself guarantee an equality-type
+target.
+
+In each round, choose a pending target from $\mathcal G\setminus\mathcal C$, perform directed
+induction on the free system, obtain a candidate $\widetilde R$ and a temporary anchor group
+$G$, and set
+\begin{equation}
+\widetilde F=F\sqcup G,\qquad
+\widetilde R_0=\widetilde R\setminus G.
+\label{eq:temporary-freeze}
+\end{equation}
+Perform residual compensation on $\widetilde R_0$ according to
+$b^\star-\Phi(\widetilde F)$, obtaining $R'$ and the complete candidate
+$X'=\widetilde F\sqcup R'$.
+Candidate generation allows the case of no switch (the target already occurs) and the case
+$G=\varnothing$ (for instance, eliminating all occurrences of an equality-type target);
+however, every \emph{successful commit} must turn at least one not-yet-committed target into
+a new commitment.
+
+Formal validation simultaneously checks the hard constraints of the complete system, the
+previously frozen records, all existing target commitments, the new target of the current
+round, and the statistical condition of the chosen mode:
+\begin{equation}
+\operatorname{Valid}_{\kappa}(X')=
+\begin{cases}
+\bigl[X'\in\mathcal E(X_0)\bigr],&
+\kappa=\mathrm{exact},\\
+\bigl[X'\in\Omega,\ E(X')\le\varepsilon\bigr],&
+\kappa=\mathrm{tol}.
+\end{cases}
+\label{eq:directed-validation}
+\end{equation}
+Here the square brackets denote that the condition holds.
+The candidate is committed officially only after all these checks pass.
+
+
+\begin{proposition}[Validity of the recursive directed construction]
+\label{prop:directed-validity}
+If the initial system satisfies the prescribed hard constraints (and, in tolerance mode, the
+initial error threshold), and before every commit the algorithm verifies by
+\eqref{eq:directed-validation} the statistical condition of the complete system, the frozen
+records, and all existing and new target commitments, then every complete system after a
+successful commit satisfies the constraints of the chosen mode, and the targets accepted
+earlier remain valid.
+If the algorithm returns $\mathrm{SUCCESS}$, the output system satisfies all of $\mathcal G$.
+\end{proposition}
+\begin{proof}
+Induct on the number of successful commits.
+The initial system satisfies the corresponding constraints, and the initial commitment set
+consists of the targets that hold in $X_0$, so the claim holds.
+Assume that the current system and its commitment set satisfy the conclusion.
+The next commit occurs only after the complete candidate has passed validation of the hard
+constraints, the statistical condition, the frozen records, and $\mathcal C\cup\{g\}$;
+hence the existing commitments are preserved and the new commitment $g$ holds.
+The updated commitment set contains only the targets actually satisfied by the new system,
+so the induction is complete.
+When $\mathcal C=\mathcal G$, all targets hold.
+\end{proof}
+
+\begin{algorithm}[H]
+\small
+\caption{Recursive directed construction of prescribed higher-order structures}
+\label{alg:directed}
+\begin{algorithmic}[1]
+\Require $X_0\in\Omega$; target set $\mathcal G$; mode
+$\kappa\in\{\mathrm{exact},\mathrm{tol}\}$; tolerance $\varepsilon$;
+per-layer budget $L$; maximum number of layers $r_{\max}$
+\Ensure Validated system $X$, frozen records $F$, commitment set $\mathcal C$, and status
+\State $X\gets X_0$; $F\gets\varnothing$;
+$\mathcal C\gets\{g\in\mathcal G:g\text{ holds in }X_0\}$
+\For{$r=1,\ldots,r_{\max}$}
+  \If{$\mathcal C=\mathcal G$}
+    \State \textbf{break}
+  \EndIf
+  \State $R\gets X\setminus F$; $\mathrm{accepted}\gets\mathrm{false}$
+  \For{$\ell=1,\ldots,L$}
+    \State Choose $g\in\mathcal G\setminus\mathcal C$;
+           search for $(\widetilde R,G)$ in $R$
+    \If{no candidate satisfying the hard constraints is found}
+      \State \textbf{continue}
+    \EndIf
+    \State $\widetilde F\gets F\sqcup G$;
+           $\widetilde R_0\gets\widetilde R\setminus G$
+    \State $b'\gets b^\star-\Phi(\widetilde F)$
+    \State $R'\gets\Call{ResidualRefit}{\widetilde R_0,b',\kappa,X_0}$
+    \If{$R'=\bot$}
+      \State \textbf{continue}
+    \EndIf
+    \State $X'\gets\widetilde F\sqcup R'$
+    \If{$\operatorname{Valid}_{\kappa}(X')$
+       and $X'$ preserves $F$ and satisfies $\mathcal C\cup\{g\}$}
+      \State $X\gets X'$; $F\gets\widetilde F$
+      \State $\mathcal C\gets\{h\in\mathcal G:h\text{ holds in }X\}$
+      \State $\mathrm{accepted}\gets\mathrm{true}$ \Comment{official commit}
+      \State \textbf{break}
+    \EndIf
+  \EndFor
+  \If{$\mathrm{accepted}=\mathrm{false}$}
+    \State \textbf{break}
+  \EndIf
+\EndFor
+\If{$\mathcal C=\mathcal G$}
+  \State $\mathrm{status}\gets\mathrm{SUCCESS}$
+\ElsIf{$\mathcal C\ne\varnothing$}
+  \State $\mathrm{status}\gets\mathrm{PARTIAL}$
+\Else
+  \State $\mathrm{status}\gets\mathrm{FAILURE}$
+\EndIf
+\State \Return $(X,F,\mathcal C,\mathrm{status})$
+\end{algorithmic}
+\end{algorithm}
+
+Every successful commit adds at least one new target commitment, so the number of successful
+commits does not exceed $|\mathcal G|$; the set of frozen records only grows or stays the
+same.
+$\mathrm{PARTIAL}$ and $\mathrm{FAILURE}$ mean only that the given operations, budget, and
+search strategy did not complete all targets; they do \emph{not} constitute a proof that the
+targets are mathematically unrealizable.
+
+\subsection{A complete construction example: induction, freezing, and residual compensation}\label{subsec:directed-example}
+
+Continue with the six-element system of \eqref{eq:intro-example}.
+Below we abbreviate $\{1,2,3\}$ by $123$, and take
+\begin{equation}
+X_0=\{123,145,246,356\},\qquad
+t_{124}\ge1,\quad t_{456}\ge1.
+\label{eq:directed-example-initial}
+\end{equation}
+Initially neither target occurs.
+There are no forbidden pairs, all four records have size $3$, and every element has quota
+$2$.
+Take $\tau_{ij}=t_{ij}(X_0)$ and $\sigma_i=s_i(X_0)=0$, set all second-order weights to
+$1$, and use exact-preservation mode.
+Since all records have size $3$, the singleton terms vanish identically;
+hence $E(X_0)=0$ in this example, and validation requires the final system to restore all
+original second-order counts.
+
+\paragraph{Step 1: directed induction.}
+Exchange elements $3$ and $4$ in records $123$ and $145$:
+\begin{equation}
+123,\ 145\longrightarrow124,\ 135,\qquad
+\widetilde X=\{124,135,246,356\}.
+\label{eq:directed-example-induction}
+\end{equation}
+Now $t_{124}(\widetilde X)=1$, but the second-order counts temporarily deviate from the
+reference system, so the candidate cannot yet be committed in exact-preservation mode.
+
+\paragraph{Step 2: temporary freezing and resource subtraction.}
+Choose the newly produced record $124$ as the anchor record and fix it only within this
+candidate branch:
+\begin{equation}
+\begin{aligned}
+\widetilde F&=\{124\},&
+\widetilde R_0&=\{135,246,356\},\\
+\boldsymbol d^{(1)}&=(1,1,2,1,2,2),&
+M_3^{(1)}&=3.
+\end{aligned}
+\label{eq:level-one-example}
+\end{equation}
+By \eqref{eq:residual-targets}, the target counts of the free system on the four deviating
+element pairs are
+\[
+(\tau_{23}^{(1)},\tau_{24}^{(1)},
+  \tau_{35}^{(1)},\tau_{45}^{(1)})=(1,0,1,1),
+\]
+whereas the corresponding actual counts of $\widetilde R_0$ are $(0,1,2,0)$.
+Hence $E_1(\widetilde R_0)=E(\widetilde X)=4$.
+This is only a temporary frozen state that has \emph{not} been committed; it does not mean
+that a system violating the statistical condition has been accepted.
+
+\paragraph{Step 3: residual compensation of the free part.}
+Without touching the anchor record $124$, exchange elements $4$ and $3$ between the two free
+records $246$ and $356$:
+\begin{equation}
+246,\ 356\longrightarrow236,\ 456,\qquad
+R'=\{135,236,456\}.
+\label{eq:directed-example-compensation}
+\end{equation}
+The residual counts of the free part are now restored, $E_1(R')=0$, and the compensation has
+additionally produced the second target $456$.
+
+\begin{table}[htbp]
+\centering
+\caption{Stepwise change of the second-order counts in the construction example}
+\label{tab:directed-example-counts}
+\begin{tabular}{cccc}
+\toprule
+Element pair & $\Delta$ at induction & $\Delta$ at compensation & Total $\Delta$\\
+\midrule
+$\{2,3\}$ & $-1$ & $+1$ & $0$\\
+$\{2,4\}$ & $+1$ & $-1$ & $0$\\
+$\{3,5\}$ & $+1$ & $-1$ & $0$\\
+$\{4,5\}$ & $-1$ & $+1$ & $0$\\
+Other pairs & $0$ & $0$ & $0$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Step 4: overall validation and official commit.}
+The complete candidate is
+\begin{equation}
+X'=\{124,135,236,456\},\qquad
+E(X_0)=0,\quad E(\widetilde X)=4,\quad E(X')=0.
+\label{eq:directed-example-acceptance}
+\end{equation}
+Table~\ref{tab:directed-example-counts} shows that all second-order counts have been
+restored; at the same time the size of every record and the quota of every element have
+remained unchanged, and $t_{124}(X')=t_{456}(X')=1$.
+Hence $X'\in\mathcal E(X_0)$, so the candidate can be committed officially and both targets
+enter the commitment set.
+If one wants to fix the actual carrier of the second target as well, one may add $456$ to the
+frozen group after this validation, obtaining
+\begin{equation}
+F^{(2)}=\{124,456\},\qquad R_2=\{135,236\},\qquad
+\boldsymbol d^{(2)}=(1,1,2,0,1,1),\quad T_3(R_2)=2.
+\label{eq:level-two-example}
+\end{equation}
+This additional freezing does not change the validated complete system and requires no
+further switch.
+
+What this example demonstrates is not a new zero-sum trade theorem:
+its two local switches together are still a staged implementation of the four-record zero-sum
+compensating trade of Section~\ref{sec:variability}.
+What needs to be shown here is that the procedure of \emph{first inducing, then temporarily
+anchoring, then compensating on the free part, and finally validating the whole} does
+preserve the prescribed targets while repairing a nonzero residual.
+
+\subsection{The effect of freezing on the construction space}\label{subsec:directed-budget}
+
+Freezing consumes records and element quotas, and it also fixes the higher-order statistical
+contribution of these records.
+At layer $r$, the total $h$-th order containment count that the free system can carry is
+\begin{equation}
+T_h(R_r)=\sum_kM_k^{(r)}\binom kh,\qquad
+T_h=T_h(F^{(r)})+T_h(R_r).
+\label{eq:residual-high-budget}
+\end{equation}
+
+\begin{proposition}[Bound on higher-order variation under a common frozen group]
+\label{prop:frozen-distance}
+Let $X=F^{(r)}\sqcup R$ and
+$Y=F^{(r)}\sqcup R'$,
+and assume that the two free systems have the same size distribution.
+For $T_h>0$,
+\begin{equation}
+\boxed{\
+d_h(X,Y)\le\frac{T_h(R_r)}{T_h}
+=1-\frac{T_h(F^{(r)})}{T_h}.\ }
+\label{eq:frozen-distance}
+\end{equation}
+\end{proposition}
+\begin{proof}
+The higher-order frequencies of the common frozen group cancel in the difference, so
+$\mathsf H_h(X)-\mathsf H_h(Y)
+=\mathsf H_h(R)-\mathsf H_h(R')$.
+Both free systems have nonnegative higher-order frequencies, and their component sums are
+both $T_h(R_r)$; hence the $\ell_1$ distance is at most $2T_h(R_r)$.
+Substituting into \eqref{eq:high-order-distance} gives the claim.
+\end{proof}
+
+If $F^{(r)}\subseteq F^{(r+1)}$, then $\Omega(F^{(r+1)})\subseteq\Omega(F^{(r)})$;
+when these feasible regions are nonempty,
+$\min_{X\in\Omega(F^{(r)})}E(X)$ is nondecreasing as freezing increases.
+The bound above shows that the more higher-order counts are frozen in common, the smaller
+the upper bound on the higher-order difference that two subsequent candidates can exhibit in
+the complete system.
+In the example above, $T_3(R)=3$ when $124$ is frozen and drops to $2$ after $456$ is also
+frozen, which precisely reflects this contraction of the construction space.
+
+\section{Realizability and Reachability of Higher-Order Structures}\label{sec:boundary}
+
+The two preceding sections established methods for transforming and deliberately
+constructing higher-order structures.
+This section studies the structural boundary that these methods face.
+To this end we organize the filtering of higher-order candidates into three layers:
+\emph{the association graph supplies candidates, finite resources determine realizability,
+and operation paths determine reachability.}
+
+\subsection{Higher-order candidates from the pairwise association graph}\label{subsec:boundary-graph}
+
+For a graph $G=(V,E_G)$, any $h$-th order candidate $S\in\mathcal K_h(G)$ satisfies
+$\binom S2\subseteq E_G$;
+that is, every two elements of $S$ have an allowed pairwise association.
+If $N_G(i)$ denotes the set of neighbors of element $i$, then, for a given clique $S$, the
+extension candidates are
+\begin{equation}
+C_G(S)=\left(\bigcap_{i\in S}N_G(i)\right)\setminus S.
+\label{eq:clique-extension}
+\end{equation}
+One enumerates the cliques of every order by starting from the edges, iteratively adding the
+elements of $C_G(S)$, and deduplicating by a fixed element order.
+
+The two graphs introduced in Section~\ref{subsec:model-feasible} serve different construction
+requirements.
+When exact preservation of the association support is prescribed, candidates are enumerated
+from $G_Q$;
+when positive-association coverage is prescribed with additional co-occurrences allowed,
+$G_{\rm allow}$ gives the complete range of allowed structures, and the cliques of $G_Q$ are
+treated as reference candidates to be examined first.
+
+For the motivating example $X_A$, the actual support graph contains the edges $\{1,2\}$,
+$\{1,4\}$, and $\{2,4\}$, so $\{1,2,4\}$ is a third-order clique candidate.
+It does not occur in $X_A$, whereas Section~\ref{sec:variability} already constructed the
+system $X_B$ realizing this candidate.
+Clique enumeration thus identifies the higher-order targets worth examining, while the
+construction algorithm produces the complete records in which the target actually occurs.
+
+\subsection{Integer realizability under finite resources}\label{subsec:boundary-ilp}
+
+For given quotas $\boldsymbol c$, size distribution $(M_k)$, and forbidden set $\mathcal Z$,
+define all legal complete block types
+\begin{equation}
+\mathcal T=\bigl\{B\subseteq V:
+|B|\in\{k:M_k>0\},\ 
+\binom B2\cap\mathcal Z=\varnothing\bigr\}.
+\label{eq:allowed-types}
+\end{equation}
+Each type $B\in\mathcal T$ corresponds to a nonnegative integer variable $z_B$, the number of
+occurrences of that type in the final system.
+
+Under positive-association coverage requirements, the existence of a finite combinatorial
+system can be written as the following integer model:
+\begin{equation}
+\begin{aligned}
+\sum_{\substack{B\in\mathcal T\\i\in B}}z_B &=c_i,
+&&i\in V,\\
+\sum_{\substack{B\in\mathcal T\\|B|=k}}z_B &=M_k,
+&&k=1,\ldots,n,\\
+\sum_{\substack{B\in\mathcal T\\\{i,j\}\subseteq B}}z_B&\ge1,
+&&\{i,j\}\in L_Q,\\
+z_B&\in\mathbb Z_{\ge0},
+&&B\in\mathcal T .
+\end{aligned}
+\label{eq:integer-feasibility}
+\end{equation}
+Every integer feasible solution corresponds to a multiset of blocks with the prescribed
+quotas, size distribution, and positive-association coverage.
+Conversely, every system satisfying these conditions yields an integer feasible solution.
+If exact low-order conservation is required, the pairwise co-occurrence constraints and the
+singleton counts are further fixed to $t_{ij}(X_0)$ and $s_i(X_0)$;
+in tolerance mode, the constraint $E(z)\le\varepsilon$ computed from the $z_B$ is added to
+the model.
+
+Let $\mathcal Z_{\rm fin}$ denote the set of integer feasible solutions of
+\eqref{eq:integer-feasibility}, and assume it is nonempty.
+For $|S|\ge3$, define
+\begin{equation}
+U(S)=
+\max_{z\in\mathcal Z_{\rm fin}}
+\sum_{\substack{B\in\mathcal T\\S\subseteq B}}z_B .
+\label{eq:max-higher-count}
+\end{equation}
+
+\begin{proposition}[Higher-order realizability under finite resources]
+\label{prop:finite-realizability}
+A prescribed higher-order set $S$ can occur in at least one combinatorial system satisfying
+\eqref{eq:integer-feasibility} if and only if $U(S)\ge1$.
+Moreover, $U(S)$ is its maximum realizable occurrence count under these constraints.
+\end{proposition}
+\begin{proof}
+For any integer feasible solution $z$, the summand of \eqref{eq:max-higher-count} equals
+exactly the number of complete records containing $S$ in the corresponding system.
+Hence the existence of a system containing $S$ at least once is equivalent to the maximum of
+this integer objective being at least one.
+\end{proof}
+
+Accordingly, define the sets of $h$-th order structures realizable under finite resources
+\begin{equation}
+\mathcal H_h^{\rm fin}
+=\{S\in\binom Vh:U(S)\ge1\}.
+\label{eq:finite-family}
+\end{equation}
+For a target $S\subseteq T$ we also have $U(T)\le U(S)$;
+therefore, once the maximum occurrence count of a structure $S$ is zero, all its
+higher-order extensions can be pruned directly during enumeration.
+
+This model also connects with the residual subtraction of Section~\ref{sec:directed}.
+If one complete record $B$ is fixed first, then the remaining element quotas become
+$c_i-\mathbf1\{i\in B\}$ and the remaining size counts become
+$M_k-\mathbf1\{|B|=k\}$.
+The positive-association edges already covered by $B$ are also subtracted from the remaining
+coverage task.
+For a group of cumulatively fixed records $F$, these updates are written uniformly as
+\begin{equation}
+d_i=c_i-c_i(F),\qquad
+M_k'=M_k-M_k(F),\qquad
+\ell_{ij}=\max\{0,1-t_{ij}(F)\}.
+\label{eq:feas-residual}
+\end{equation}
+Here $\ell_{ij}$ is the minimum co-occurrence count that the remaining system must realize.
+A realizability decision can therefore fix candidate records one by one, update the resources
+recursively, and solve the remaining integer feasibility problem at each layer.
+
+\subsection{A resource-conflict example for a clique candidate}\label{subsec:boundary-counterexample}
+
+Consider four elements $a,b,c,d$ and the combinatorial system
+\begin{equation}
+X_C=\bigl\{\{a,b,d\},\{a,c\},\{b,c\}\bigr\}.
+\label{eq:resource-counterexample}
+\end{equation}
+Its size distribution is $M_3=1,M_2=2$, and its element quotas are
+$(c_a,c_b,c_c,c_d)=(2,2,2,1)$.
+The actual support graph contains $\{a,b\},\{a,c\},\{b,c\}$, so $\{a,b,c\}$ forms a triangle.
+
+Now fix the quotas and the size distribution above and require every positive association of
+the original support graph to occur at least once.
+Element $d$ has only one occurrence, while the edges $\{a,d\}$ and $\{b,d\}$ both need to be
+covered, so $a,b,d$ must jointly occupy the record containing $d$.
+Since the system has only one $3$-element record, it must be $\{a,b,d\}$.
+Hence
+\begin{equation}
+U(\{a,b,c\})=0.
+\label{eq:resource-exclusion}
+\end{equation}
+This example shows that the association graph supplies combinatorial candidates, whereas the
+finite record capacities, element quotas, and association coverage together determine whether
+a candidate is actually realizable.
+
+\subsection{From mathematical realizability to operational reachability}\label{subsec:boundary-reachability}
+
+Fix an initial system $X_0$ and an operation set $\mathcal A$.
+Take the complete systems satisfying the hard constraints as the vertices of a state graph,
+and the operations of $\mathcal A$, applied one at a time, as the edges between vertices.
+An operation may be a general legal $2$-switch, a zero-sum compensating trade as in
+Section~\ref{sec:variability}, or may also include the freezing rules of
+Section~\ref{sec:directed}.
+
+Let $\mathcal R_{\mathcal A}^{\rm end}(X_0)$ denote the set of states reachable from $X_0$
+by finitely many operation edges, with the hard constraints of $\Omega$ maintained along the
+way; let $\mathcal R_{\mathcal A}^{\rm path}(X_0)$ denote the set of reachable states that
+additionally require every intermediate state to satisfy a prescribed statistical tolerance,
+association coverage, or freezing condition.
+By definition,
+\begin{equation}
+\mathcal R_{\mathcal A}^{\rm path}(X_0)
+\subseteq\mathcal R_{\mathcal A}^{\rm end}(X_0).
+\label{eq:path-inclusion}
+\end{equation}
+
+This distinction can again be illustrated by $X_A$ and $X_B$.
+In $X_A$ every nonzero element pair occurs exactly once.
+Any nontrivial single $2$-switch changes the counts of some of these pairs, so it cannot serve
+as an independent search step that preserves the complete second-order counts step by step.
+After Section~\ref{sec:variability} combines two switches into one zero-sum operation, one
+directly obtains an operation edge from $X_A$ to $X_B$ inside the equivalence class.
+The composite operation thus enlarges the local transformations available under strict
+low-order statistical constraints.
+
+For a given operation rule, define the set of operationally reachable higher-order structures
+\begin{equation}
+\mathcal H_h^{\rm op}(X_0;\mathcal A)
+=\bigcup_{\substack{X\in\mathcal R_{\mathcal A}^{\rm end}(X_0)\\
+X\in\Omega^+(L_Q)}}
+\{S\in\binom Vh:t_S(X)\ge1\}.
+\label{eq:operation-family}
+\end{equation}
+Setting the operation endpoints under the same finite resources and association coverage as
+\eqref{eq:integer-feasibility} gives
+\begin{equation}
+\boxed{\ 
+\mathcal H_h^{\rm op}(X_0;\mathcal A)
+\subseteq\mathcal H_h^{\rm fin}.
+\ }
+\label{eq:finite-operation-inclusion}
+\end{equation}
+This holds because every legal reachable endpoint is itself a feasible construction of the
+integer model.
+For problems of finite size one can search the state graph explicitly;
+for larger problems, the compensating trades of Section~\ref{sec:variability}, the directed
+construction of Section~\ref{sec:directed}, and integer feasibility checks together supply
+structural witnesses.
+
+This section thus completes the connection of the three layers:
+clique enumeration gives graph-theoretic candidates for higher-order structures, the integer
+model determines the actually realizable set under finite resources, and the state graph
+characterizes the reachable part under the prescribed operation rule and initial conditions.
+This boundary analysis provides a unified decision framework for the structural
+transformations and directed constructions of the two preceding sections.
+
+\end{document}

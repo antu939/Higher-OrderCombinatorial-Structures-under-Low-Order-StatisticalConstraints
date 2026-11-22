@@ -1,0 +1,88 @@
+{
+  "accepted_transitions": 27,
+  "best_loss": 0.0,
+  "best_system": [
+    [
+      1
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      4,
+      5,
+      6
+    ],
+    [
+      1,
+      4,
+      6
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      3
+    ]
+  ],
+  "exact_local_delta_checked_at_every_accepted_swap": true,
+  "initial_loss": 16.0,
+  "iterations_executed": 37,
+  "maxflow_initialized_system": [
+    [
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      3,
+      4
+    ],
+    [
+      3,
+      4,
+      5
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6
+    ]
+  ],
+  "not_from_original_paper_example": true,
+  "paper": "Section 3 algorithm, ADDITIONAL mixed-size seeded benchmark",
+  "reference": [
+    [
+      1
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      4,
+      5,
+      6
+    ],
+    [
+      1,
+      4,
+      6
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      3
+    ]
+  ],
+  "seed": 2026
+}

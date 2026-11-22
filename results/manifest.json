@@ -1,0 +1,35 @@
+{
+  "experiments": [
+    {
+      "experiment": "ex01_cross_stratum",
+      "artifact": "ex01_cross_stratum.json",
+      "paper": "Section 3, cross-stratum 2-switch and exact delta"
+    },
+    {
+      "experiment": "ex02_zero_sum",
+      "artifact": "ex02_zero_sum.json",
+      "paper": "Section 4, four-record zero-sum trade"
+    },
+    {
+      "experiment": "ex03_directed_freeze",
+      "artifact": "ex03_directed_freeze.json",
+      "paper": "Section 5, complete constructive example"
+    },
+    {
+      "experiment": "ex04_resource_conflict",
+      "artifact": "ex04_resource_conflict.json",
+      "paper": "Section 6, triangle candidate versus finite feasibility"
+    },
+    {
+      "experiment": "ex05_reachability",
+      "artifact": "ex05_reachability.json",
+      "paper": "Section 6, operation reachability and finite feasibility"
+    },
+    {
+      "experiment": "ex06_seeded_fitting",
+      "artifact": "ex06_seeded_fitting.json",
+      "paper": "Section 3 algorithm, ADDITIONAL mixed-size seeded benchmark"
+    }
+  ],
+  "fitting_seed": 2026
+}

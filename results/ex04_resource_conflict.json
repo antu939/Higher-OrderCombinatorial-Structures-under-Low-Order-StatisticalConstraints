@@ -1,0 +1,101 @@
+{
+  "initial_system": [
+    [
+      "a",
+      "b",
+      "d"
+    ],
+    [
+      "a",
+      "c"
+    ],
+    [
+      "b",
+      "c"
+    ]
+  ],
+  "paper": "Section 6, triangle candidate versus finite feasibility",
+  "quotas": {
+    "a": 2,
+    "b": 2,
+    "c": 2,
+    "d": 1
+  },
+  "size_counts": {
+    "2": 2,
+    "3": 1
+  },
+  "support_edges": [
+    [
+      "a",
+      "b"
+    ],
+    [
+      "a",
+      "c"
+    ],
+    [
+      "a",
+      "d"
+    ],
+    [
+      "b",
+      "c"
+    ],
+    [
+      "b",
+      "d"
+    ]
+  ],
+  "triangle_candidates": [
+    [
+      "a",
+      "b",
+      "c"
+    ],
+    [
+      "a",
+      "b",
+      "d"
+    ]
+  ],
+  "with_required_coverage": {
+    "U_abc": 0,
+    "explored_integer_states": 156,
+    "feasible": true,
+    "one_witness": [
+      [
+        "a",
+        "b",
+        "d"
+      ],
+      [
+        "a",
+        "c"
+      ],
+      [
+        "b",
+        "c"
+      ]
+    ]
+  },
+  "without_required_coverage_EXTRA_CONTROL": {
+    "U_abc": 1,
+    "feasible": true,
+    "one_witness": [
+      [
+        "a",
+        "b",
+        "c"
+      ],
+      [
+        "a",
+        "b"
+      ],
+      [
+        "c",
+        "d"
+      ]
+    ]
+  }
+}

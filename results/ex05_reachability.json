@@ -1,0 +1,158 @@
+{
+  "every_switch_must_preserve_pair_counts": {
+    "found": false,
+    "truncated": false,
+    "visited": 1
+  },
+  "finite_integer_model_with_exact_pair_counts": {
+    "feasible": true,
+    "integer_states": 212,
+    "max_t124": 1,
+    "witness": [
+      [
+        1,
+        2,
+        4
+      ],
+      [
+        1,
+        3,
+        5
+      ],
+      [
+        2,
+        3,
+        6
+      ],
+      [
+        4,
+        5,
+        6
+      ]
+    ]
+  },
+  "general_switch_endpoint": {
+    "found": true,
+    "path": [
+      [
+        [
+          1,
+          2,
+          3
+        ],
+        [
+          1,
+          4,
+          5
+        ],
+        [
+          2,
+          4,
+          6
+        ],
+        [
+          3,
+          5,
+          6
+        ]
+      ],
+      [
+        [
+          1,
+          2,
+          4
+        ],
+        [
+          1,
+          3,
+          5
+        ],
+        [
+          2,
+          4,
+          6
+        ],
+        [
+          3,
+          5,
+          6
+        ]
+      ],
+      [
+        [
+          1,
+          2,
+          4
+        ],
+        [
+          1,
+          3,
+          5
+        ],
+        [
+          2,
+          3,
+          6
+        ],
+        [
+          4,
+          5,
+          6
+        ]
+      ]
+    ],
+    "transitions": 2,
+    "visited": 248
+  },
+  "one_zero_sum_trade_must_preserve_pair_counts": {
+    "found": true,
+    "path": [
+      [
+        [
+          1,
+          2,
+          3
+        ],
+        [
+          1,
+          4,
+          5
+        ],
+        [
+          2,
+          4,
+          6
+        ],
+        [
+          3,
+          5,
+          6
+        ]
+      ],
+      [
+        [
+          1,
+          2,
+          4
+        ],
+        [
+          1,
+          3,
+          5
+        ],
+        [
+          2,
+          3,
+          6
+        ],
+        [
+          4,
+          5,
+          6
+        ]
+      ]
+    ],
+    "transitions": 1
+  },
+  "paper": "Section 6, operation reachability and finite feasibility"
+}
